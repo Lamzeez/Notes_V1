@@ -212,6 +212,7 @@ class _NoteCardState extends State<NoteCard>
           ),
         ),
       ),
+      ),
     );
   }
 
