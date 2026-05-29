@@ -24,7 +24,9 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/Notes_V1_logo.png"
+  image_path: "assets/Notes_V1_logoo.png"
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/

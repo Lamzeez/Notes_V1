@@ -216,18 +216,14 @@ class _NotesScreenState extends State<NotesScreen> {
         surfaceTintColor: Colors.transparent,
         title: Row(
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF5C6BC0), Color(0xFF7986CB)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/Notes_V1_logoo.png',
+                width: 32,
+                height: 32,
+                fit: BoxFit.cover,
               ),
-              child: const Icon(Icons.notes_rounded, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 10),
             Text(
