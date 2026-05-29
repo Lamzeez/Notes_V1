@@ -217,14 +217,11 @@ class _SearchScreenState extends State<SearchScreen>
               itemCount: _results.length,
               itemBuilder: (context, index) {
                 final note = _results[index];
-                return GestureDetector(
+                return NoteCard(
+                  note: note,
+                  highlightQuery: _searchController.text,
                   onTap: () => Navigator.pop(context, note.id),
-                  child: NoteCard(
-                    note: note,
-                    highlightQuery: _searchController.text,
-                    onEdit: () {},
-                    onDelete: () {},
-                  ),
+                  onLongPress: () {},
                 );
               },
             ),

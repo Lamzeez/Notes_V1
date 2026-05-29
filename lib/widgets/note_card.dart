@@ -40,16 +40,16 @@ class NoteCard extends StatelessWidget {
   final Note note;
   final String highlightQuery;
   final bool isHighlighted; // Glow highlight after scroll-to
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   const NoteCard({
     super.key,
     required this.note,
     this.highlightQuery = '',
     this.isHighlighted = false,
-    required this.onEdit,
-    required this.onDelete,
+    required this.onTap,
+    required this.onLongPress,
   });
 
   String _formatDate(DateTime dt) {
@@ -114,7 +114,8 @@ class NoteCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onLongPress: () => _showActions(context),
+        onTap: onTap,
+        onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
           child: Column(
@@ -150,23 +151,13 @@ class NoteCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                  const Spacer(),
-                  // More actions button
-                  GestureDetector(
-                    onTap: () => _showActions(context),
-                    child: Icon(
-                      Icons.more_horiz_rounded,
-                      size: 18,
-                      color: isDark
-                          ? Colors.white.withAlpha(80)
-                          : Colors.black26,
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 8),
               // Note content with optional highlight
               RichText(
+                maxLines: 7,
+                overflow: TextOverflow.ellipsis,
                 text: buildHighlightedText(
                   text: note.content,
                   query: highlightQuery,
@@ -181,70 +172,4 @@ class NoteCard extends StatelessWidget {
     );
   }
 
-  void _showActions(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? const Color(0xFF1E1E2E) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle bar
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : Colors.black12,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.edit_rounded,
-                  color: isDark ? const Color(0xFF7986CB) : const Color(0xFF3F51B5),
-                ),
-                title: Text(
-                  'Edit Note',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  onEdit();
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.delete_outline_rounded,
-                  color: Color(0xFFE57373),
-                ),
-                title: const Text(
-                  'Delete Note',
-                  style: TextStyle(
-                    color: Color(0xFFE57373),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  onDelete();
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
