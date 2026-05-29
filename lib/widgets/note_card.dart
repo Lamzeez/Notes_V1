@@ -1,0 +1,250 @@
+import 'package:flutter/material.dart';
+import '../models/note.dart';
+
+/// Builds a [TextSpan] that highlights all occurrences of [query] within [text].
+TextSpan buildHighlightedText({
+  required String text,
+  required String query,
+  required TextStyle normalStyle,
+  required TextStyle highlightStyle,
+}) {
+  if (query.isEmpty) {
+    return TextSpan(text: text, style: normalStyle);
+  }
+
+  final lowerText = text.toLowerCase();
+  final lowerQuery = query.toLowerCase();
+  final spans = <TextSpan>[];
+  int start = 0;
+
+  while (true) {
+    final index = lowerText.indexOf(lowerQuery, start);
+    if (index == -1) {
+      spans.add(TextSpan(text: text.substring(start), style: normalStyle));
+      break;
+    }
+    if (index > start) {
+      spans.add(TextSpan(text: text.substring(start, index), style: normalStyle));
+    }
+    spans.add(TextSpan(
+      text: text.substring(index, index + query.length),
+      style: highlightStyle,
+    ));
+    start = index + query.length;
+  }
+
+  return TextSpan(children: spans);
+}
+
+class NoteCard extends StatelessWidget {
+  final Note note;
+  final String highlightQuery;
+  final bool isHighlighted; // Glow highlight after scroll-to
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const NoteCard({
+    super.key,
+    required this.note,
+    this.highlightQuery = '',
+    this.isHighlighted = false,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  String _formatDate(DateTime dt) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final period = dt.hour < 12 ? 'AM' : 'PM';
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year} · $hour:$minute $period';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final normalStyle = theme.textTheme.bodyLarge!.copyWith(
+      height: 1.55,
+      color: isDark ? Colors.white.withAlpha(230) : Colors.black87,
+    );
+    final highlightStyle = normalStyle.copyWith(
+      backgroundColor: isDark
+          ? const Color(0xFF5C6BC0).withAlpha(100)
+          : const Color(0xFFB9C3FF),
+      fontWeight: FontWeight.w600,
+      color: isDark ? Colors.white : const Color(0xFF1A237E),
+    );
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: isHighlighted
+            ? (isDark
+                ? const Color(0xFF3F4280).withAlpha(160)
+                : const Color(0xFFE8EBFF))
+            : (isDark
+                ? const Color(0xFF1E1E2E)
+                : Colors.white),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isHighlighted
+              ? (isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0))
+              : (isDark
+                  ? Colors.white.withAlpha(15)
+                  : Colors.black.withAlpha(12)),
+          width: isHighlighted ? 1.5 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isHighlighted
+                ? (isDark
+                    ? const Color(0xFF5C6BC0).withAlpha(60)
+                    : const Color(0xFF9FA8DA).withAlpha(80))
+                : Colors.black.withAlpha(isDark ? 25 : 12),
+            blurRadius: isHighlighted ? 16 : 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onLongPress: () => _showActions(context),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Timestamp row
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 12,
+                    color: isDark
+                        ? Colors.white.withAlpha(100)
+                        : Colors.black38,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _formatDate(note.createdAt),
+                    style: theme.textTheme.labelSmall!.copyWith(
+                      color: isDark ? Colors.white.withAlpha(100) : Colors.black38,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  if (note.updatedAt != note.createdAt) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      '(edited)',
+                      style: theme.textTheme.labelSmall!.copyWith(
+                        color: isDark
+                            ? Colors.white.withAlpha(70)
+                            : Colors.black26,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  // More actions button
+                  GestureDetector(
+                    onTap: () => _showActions(context),
+                    child: Icon(
+                      Icons.more_horiz_rounded,
+                      size: 18,
+                      color: isDark
+                          ? Colors.white.withAlpha(80)
+                          : Colors.black26,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Note content with optional highlight
+              RichText(
+                text: buildHighlightedText(
+                  text: note.content,
+                  query: highlightQuery,
+                  normalStyle: normalStyle,
+                  highlightStyle: highlightStyle,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showActions(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.edit_rounded,
+                  color: isDark ? const Color(0xFF7986CB) : const Color(0xFF3F51B5),
+                ),
+                title: Text(
+                  'Edit Note',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onEdit();
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Color(0xFFE57373),
+                ),
+                title: const Text(
+                  'Delete Note',
+                  style: TextStyle(
+                    color: Color(0xFFE57373),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onDelete();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
