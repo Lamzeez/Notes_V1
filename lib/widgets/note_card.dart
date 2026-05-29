@@ -36,7 +36,7 @@ TextSpan buildHighlightedText({
   return TextSpan(children: spans);
 }
 
-class NoteCard extends StatelessWidget {
+class NoteCard extends StatefulWidget {
   final Note note;
   final String highlightQuery;
   final bool isHighlighted; // Glow highlight after scroll-to
@@ -51,6 +51,34 @@ class NoteCard extends StatelessWidget {
     required this.onTap,
     required this.onLongPress,
   });
+
+  @override
+  State<NoteCard> createState() => _NoteCardState();
+}
+
+class _NoteCardState extends State<NoteCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
 
   String _formatDate(DateTime dt) {
     final months = [
@@ -68,23 +96,24 @@ class NoteCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final normalStyle = theme.textTheme.bodyLarge!.copyWith(
-      height: 1.55,
-      color: isDark ? Colors.white.withAlpha(230) : Colors.black87,
+    final baseStyle = theme.textTheme.bodyMedium!.copyWith(
+      height: 1.6,
+      color: isDark ? Colors.white.withAlpha(220) : Colors.black87,
     );
-    final highlightStyle = normalStyle.copyWith(
+
+    final highlightStyle = baseStyle.copyWith(
       backgroundColor: isDark
-          ? const Color(0xFF5C6BC0).withAlpha(100)
-          : const Color(0xFFB9C3FF),
+          ? const Color(0xFF7986CB).withAlpha(100)
+          : const Color(0xFF5C6BC0).withAlpha(60),
+      color: isDark ? Colors.white : Colors.black,
       fontWeight: FontWeight.w600,
-      color: isDark ? Colors.white : const Color(0xFF1A237E),
     );
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: isHighlighted
+        color: widget.isHighlighted
             ? (isDark
                 ? const Color(0xFF3F4280).withAlpha(160)
                 : const Color(0xFFE8EBFF))
@@ -93,30 +122,43 @@ class NoteCard extends StatelessWidget {
                 : Colors.white),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isHighlighted
+          color: widget.isHighlighted
               ? (isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0))
               : (isDark
                   ? Colors.white.withAlpha(15)
                   : Colors.black.withAlpha(12)),
-          width: isHighlighted ? 1.5 : 1,
+          width: widget.isHighlighted ? 1.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: isHighlighted
+            color: widget.isHighlighted
                 ? (isDark
                     ? const Color(0xFF5C6BC0).withAlpha(60)
                     : const Color(0xFF9FA8DA).withAlpha(80))
                 : Colors.black.withAlpha(isDark ? 25 : 12),
-            blurRadius: isHighlighted ? 16 : 8,
+            blurRadius: widget.isHighlighted ? 16 : 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Padding(
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: child,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onHighlightChanged: (isHighlighted) {
+            if (isHighlighted) {
+              _scaleController.forward();
+            } else {
+              _scaleController.reverse();
+            }
+          },
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
+          child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,14 +175,15 @@ class NoteCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    _formatDate(note.createdAt),
+                    _formatDate(widget.note.createdAt),
                     style: theme.textTheme.labelSmall!.copyWith(
                       color: isDark ? Colors.white.withAlpha(100) : Colors.black38,
+                      fontWeight: FontWeight.w500,
                       letterSpacing: 0.2,
                     ),
                   ),
-                  if (note.updatedAt != note.createdAt) ...[
-                    const SizedBox(width: 6),
+                  if (widget.note.updatedAt != widget.note.createdAt) ...[
+                    const SizedBox(width: 8),
                     Text(
                       '(edited)',
                       style: theme.textTheme.labelSmall!.copyWith(
@@ -159,9 +202,9 @@ class NoteCard extends StatelessWidget {
                 maxLines: 7,
                 overflow: TextOverflow.ellipsis,
                 text: buildHighlightedText(
-                  text: note.content,
-                  query: highlightQuery,
-                  normalStyle: normalStyle,
+                  text: widget.note.content,
+                  query: widget.highlightQuery,
+                  normalStyle: baseStyle,
                   highlightStyle: highlightStyle,
                 ),
               ),

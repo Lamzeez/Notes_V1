@@ -24,6 +24,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   // Map from note id -> GlobalKey for scroll-to
   final Map<int, GlobalKey> _noteKeys = {};
+  final List<int> _deletingNoteIds = [];
 
   @override
   void dispose() {
@@ -108,9 +109,15 @@ class _NotesScreenState extends State<NotesScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            onPressed: () {
-              context.read<NotesProvider>().deleteNote(note.id!);
+            onPressed: () async {
               Navigator.pop(ctx);
+              final noteId = note.id!;
+              setState(() => _deletingNoteIds.add(noteId));
+              await Future.delayed(const Duration(milliseconds: 300));
+              if (mounted) {
+                context.read<NotesProvider>().deleteNote(noteId);
+                setState(() => _deletingNoteIds.remove(noteId));
+              }
             },
             child: const Text('Delete'),
           ),
@@ -298,16 +305,20 @@ class _NotesScreenState extends State<NotesScreen> {
                   itemCount: notes.length,
                   itemBuilder: (context, index) {
                     final note = notes[index];
+                    final isDeleting = _deletingNoteIds.contains(note.id);
                     return KeyedSubtree(
                       key: _noteKeys[note.id!],
-                      child: NoteCard(
-                        note: note,
-                        isHighlighted: _highlightedNoteId == note.id,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => NoteEditorScreen(note: note)),
+                      child: AnimatedNoteItem(
+                        isDeleting: isDeleting,
+                        child: NoteCard(
+                          note: note,
+                          isHighlighted: _highlightedNoteId == note.id,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => NoteEditorScreen(note: note)),
+                          ),
+                          onLongPress: () => _showActions(context, note),
                         ),
-                        onLongPress: () => _showActions(context, note),
                       ),
                     );
                   },
@@ -354,6 +365,52 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AnimatedNoteItem extends StatefulWidget {
+  final bool isDeleting;
+  final Widget child;
+
+  const AnimatedNoteItem({super.key, required this.isDeleting, required this.child});
+
+  @override
+  State<AnimatedNoteItem> createState() => _AnimatedNoteItemState();
+}
+
+class _AnimatedNoteItemState extends State<AnimatedNoteItem> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+  }
+
+  @override
+  void didUpdateWidget(AnimatedNoteItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isDeleting && !oldWidget.isDeleting) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizeTransition(
+      sizeFactor: Tween<double>(begin: 1.0, end: 0.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
+      axisAlignment: -1.0,
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut)),
+        child: widget.child,
       ),
     );
   }
