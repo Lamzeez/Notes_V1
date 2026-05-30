@@ -28,43 +28,37 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     if (widget.matchIndex != null && widget.matchLength != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        // Calculate exact Y offset of the match
+        final text = _contentController.text.substring(0, widget.matchIndex!);
+        final textSpan = TextSpan(
+          text: text,
+          style: const TextStyle(fontSize: 16, height: 1.6),
+        );
+        final textPainter = TextPainter(
+          text: textSpan,
+          textDirection: TextDirection.ltr,
+        );
+        
+        // Calculate width: screen width - 40 for horizontal padding
+        textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 40);
+        
+        final yOffset = textPainter.size.height;
+        final targetOffset = (yOffset - 20) < 0 ? 0.0 : (yOffset - 20);
+
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(targetOffset);
+        }
+
+        // Focus and select the text
         _contentFocusNode.requestFocus();
         _contentController.selection = TextSelection(
           baseOffset: widget.matchIndex!,
           extentOffset: widget.matchIndex! + widget.matchLength!,
         );
-        
-        Future.delayed(const Duration(milliseconds: 100), _scrollToMatch);
       });
     }
-  }
-
-  void _scrollToMatch() {
-    if (widget.matchIndex == null || !mounted || !_scrollController.hasClients) return;
-    
-    final text = _contentController.text.substring(0, widget.matchIndex!);
-    final textSpan = TextSpan(
-      text: text,
-      style: const TextStyle(fontSize: 16, height: 1.6),
-    );
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
-    
-    // Calculate width: screen width - 40 for horizontal padding
-    textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 40);
-    
-    final yOffset = textPainter.size.height;
-    
-    // We scroll slightly above the text so it has some padding from the top
-    final targetOffset = (yOffset - 20).clamp(0.0, _scrollController.position.maxScrollExtent);
-    
-    _scrollController.animateTo(
-      targetOffset.toDouble(),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
   }
 
   @override
