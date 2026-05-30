@@ -60,6 +60,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       final textPainter = TextPainter(
         text: textSpan,
         textDirection: TextDirection.ltr,
+        textScaler: MediaQuery.textScalerOf(context),
       );
       
       textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 40);
