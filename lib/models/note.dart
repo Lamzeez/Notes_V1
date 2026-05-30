@@ -4,6 +4,8 @@ class Note {
   final String content;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool isDeleted;
+  final DateTime? deletedAt;
 
   Note({
     this.id,
@@ -11,6 +13,8 @@ class Note {
     required this.content,
     required this.createdAt,
     required this.updatedAt,
+    this.isDeleted = false,
+    this.deletedAt,
   });
 
   Note copyWith({
@@ -19,6 +23,8 @@ class Note {
     String? content,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isDeleted,
+    DateTime? deletedAt,
   }) {
     return Note(
       id: id ?? this.id,
@@ -26,6 +32,8 @@ class Note {
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 
@@ -36,6 +44,8 @@ class Note {
       'content': content,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
+      'is_deleted': isDeleted ? 1 : 0,
+      'deleted_at': deletedAt?.millisecondsSinceEpoch,
     };
   }
 
@@ -46,6 +56,10 @@ class Note {
       content: map['content'] as String,
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at'] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at'] as int),
+      isDeleted: (map['is_deleted'] as int?) == 1,
+      deletedAt: map['deleted_at'] != null 
+          ? DateTime.fromMillisecondsSinceEpoch(map['deleted_at'] as int)
+          : null,
     );
   }
 }

@@ -6,9 +6,11 @@ class NotesProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper.instance;
 
   List<Note> _notes = [];
+  List<Note> _deletedNotes = [];
   bool _isLoading = false;
 
   List<Note> get notes => _notes;
+  List<Note> get deletedNotes => _deletedNotes;
   bool get isLoading => _isLoading;
 
   NotesProvider() {
@@ -18,7 +20,9 @@ class NotesProvider extends ChangeNotifier {
   Future<void> loadNotes() async {
     _isLoading = true;
     notifyListeners();
+    await _db.cleanUpOldDeletedNotes();
     _notes = await _db.getAllNotes();
+    _deletedNotes = await _db.getDeletedNotes();
     _isLoading = false;
     notifyListeners();
   }
@@ -43,6 +47,7 @@ class NotesProvider extends ChangeNotifier {
   Future<void> deleteNote(int id) async {
     await _db.deleteNote(id);
     _notes.removeWhere((n) => n.id == id);
+    _deletedNotes = await _db.getDeletedNotes();
     notifyListeners();
   }
 
@@ -50,6 +55,35 @@ class NotesProvider extends ChangeNotifier {
     if (ids.isEmpty) return;
     await _db.deleteNotes(ids);
     _notes.removeWhere((n) => ids.contains(n.id));
+    _deletedNotes = await _db.getDeletedNotes();
+    notifyListeners();
+  }
+
+  Future<void> restoreNote(int id) async {
+    await _db.restoreNote(id);
+    _deletedNotes.removeWhere((n) => n.id == id);
+    _notes = await _db.getAllNotes();
+    notifyListeners();
+  }
+
+  Future<void> restoreNotes(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await _db.restoreNotes(ids);
+    _deletedNotes.removeWhere((n) => ids.contains(n.id));
+    _notes = await _db.getAllNotes();
+    notifyListeners();
+  }
+
+  Future<void> permanentlyDeleteNote(int id) async {
+    await _db.permanentlyDeleteNote(id);
+    _deletedNotes.removeWhere((n) => n.id == id);
+    notifyListeners();
+  }
+
+  Future<void> permanentlyDeleteNotes(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await _db.permanentlyDeleteNotes(ids);
+    _deletedNotes.removeWhere((n) => ids.contains(n.id));
     notifyListeners();
   }
 

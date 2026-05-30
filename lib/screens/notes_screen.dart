@@ -7,6 +7,7 @@ import '../providers/theme_provider.dart';
 import '../widgets/note_card.dart';
 import 'search_screen.dart';
 import 'note_editor_screen.dart';
+import 'recently_deleted_screen.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
@@ -269,6 +270,20 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
             tooltip: 'Search notes',
             onPressed: notes.isEmpty ? null : _openSearch,
+          ),
+          // Recently Deleted
+          IconButton(
+            icon: Icon(
+              Icons.auto_delete_outlined,
+              color: isDark ? Colors.white70 : const Color(0xFF3F4280),
+            ),
+            tooltip: 'Recently Deleted',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RecentlyDeletedScreen()),
+              );
+            },
           ),
           // Theme toggle
           IconButton(
