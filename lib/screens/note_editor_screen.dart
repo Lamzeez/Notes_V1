@@ -200,7 +200,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       fontSize: 16,
                     ),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
+                    // "Scroll Past End" padding allows the very last line to reach the top
+                    contentPadding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).size.height / 1.5,
+                    ),
                   ),
                 ),
               ),
