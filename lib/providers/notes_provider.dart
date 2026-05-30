@@ -23,15 +23,15 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Note> addNote(String content) async {
-    final note = await _db.insertNote(content.trim());
+  Future<Note> addNote(String? title, String content) async {
+    final note = await _db.insertNote(title, content.trim());
     _notes.insert(0, note); // Insert at top (newest first)
     notifyListeners();
     return note;
   }
 
-  Future<void> editNote(Note note, String newContent) async {
-    final updated = note.copyWith(content: newContent.trim());
+  Future<void> editNote(Note note, String? newTitle, String newContent) async {
+    final updated = note.copyWith(title: newTitle, content: newContent.trim());
     await _db.updateNote(updated);
     final index = _notes.indexWhere((n) => n.id == note.id);
     if (index != -1) {

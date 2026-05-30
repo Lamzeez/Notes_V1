@@ -5,43 +5,61 @@ import '../providers/notes_provider.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   final Note? note;
+  final int? matchIndex;
+  final int? matchLength;
 
-  const NoteEditorScreen({super.key, this.note});
+  const NoteEditorScreen({super.key, this.note, this.matchIndex, this.matchLength});
 
   @override
   State<NoteEditorScreen> createState() => _NoteEditorScreenState();
 }
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
-  late TextEditingController _controller;
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
+  final FocusNode _contentFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.note?.content ?? '');
+    _titleController = TextEditingController(text: widget.note?.title ?? '');
+    _contentController = TextEditingController(text: widget.note?.content ?? '');
+
+    if (widget.matchIndex != null && widget.matchLength != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _contentFocusNode.requestFocus();
+        _contentController.selection = TextSelection(
+          baseOffset: widget.matchIndex!,
+          extentOffset: widget.matchIndex! + widget.matchLength!,
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _titleController.dispose();
+    _contentController.dispose();
+    _contentFocusNode.dispose();
     super.dispose();
   }
 
   void _saveNote() {
-    final text = _controller.text.trim();
-    if (text.isEmpty && widget.note == null) {
+    final title = _titleController.text.trim();
+    final text = _contentController.text.trim();
+    if (text.isEmpty && title.isEmpty && widget.note == null) {
       Navigator.pop(context);
       return;
     }
 
     final provider = context.read<NotesProvider>();
     if (widget.note == null) {
-      provider.addNote(text);
+      provider.addNote(title.isEmpty ? null : title, text);
     } else {
-      if (text.isEmpty) {
+      if (text.isEmpty && title.isEmpty) {
         provider.deleteNote(widget.note!.id!);
       } else {
-        provider.editNote(widget.note!, text);
+        provider.editNote(widget.note!, title.isEmpty ? null : title, text);
       }
     }
     Navigator.pop(context, true);
@@ -95,27 +113,54 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: TextField(
-            controller: _controller,
-            autofocus: widget.note == null,
-            maxLines: null,
-            expands: true,
-            textAlignVertical: TextAlignVertical.top,
-            textCapitalization: TextCapitalization.sentences,
-            style: TextStyle(
-              color: isDark ? Colors.white.withAlpha(230) : Colors.black87,
-              fontSize: 16,
-              height: 1.6,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Start writing your note here...',
-              hintStyle: TextStyle(
-                color: isDark ? Colors.white30 : Colors.black38,
-                fontSize: 16,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _titleController,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Title',
+                  hintStyle: TextStyle(
+                    color: isDark ? Colors.white30 : Colors.black38,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
-            ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: TextField(
+                  controller: _contentController,
+                  focusNode: _contentFocusNode,
+                  autofocus: widget.note == null && widget.matchIndex == null,
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: TextStyle(
+                    color: isDark ? Colors.white.withAlpha(230) : Colors.black87,
+                    fontSize: 16,
+                    height: 1.6,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Start writing your note here...',
+                    hintStyle: TextStyle(
+                      color: isDark ? Colors.white30 : Colors.black38,
+                      fontSize: 16,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

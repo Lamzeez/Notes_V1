@@ -197,6 +197,19 @@ class _NoteCardState extends State<NoteCard>
                 ],
               ),
               const SizedBox(height: 8),
+              if (widget.note.title != null && widget.note.title!.trim().isNotEmpty) ...[
+                Text(
+                  widget.note.title!,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+              ],
               // Note content with optional highlight
               RichText(
                 maxLines: 7,

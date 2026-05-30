@@ -20,15 +20,23 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE notes ADD COLUMN title TEXT');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE notes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
         content TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
@@ -37,10 +45,11 @@ class DatabaseHelper {
   }
 
   // Insert a new note
-  Future<Note> insertNote(String content) async {
+  Future<Note> insertNote(String? title, String content) async {
     final db = await database;
     final now = DateTime.now();
     final note = Note(
+      title: title,
       content: content,
       createdAt: now,
       updatedAt: now,
@@ -59,14 +68,14 @@ class DatabaseHelper {
     return maps.map((m) => Note.fromMap(m)).toList();
   }
 
-  // Real-time search — anywhere in content, newest first
+  // Real-time search — anywhere in content or title, newest first
   Future<List<Note>> searchNotes(String query) async {
     if (query.trim().isEmpty) return [];
     final db = await database;
     final maps = await db.query(
       'notes',
-      where: 'content LIKE ?',
-      whereArgs: ['%$query%'],
+      where: 'content LIKE ? OR title LIKE ?',
+      whereArgs: ['%$query%', '%$query%'],
       orderBy: 'created_at DESC',
     );
     return maps.map((m) => Note.fromMap(m)).toList();

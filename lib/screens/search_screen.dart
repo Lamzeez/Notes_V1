@@ -5,6 +5,7 @@ import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/note_card.dart';
+import 'note_editor_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -98,7 +99,7 @@ class _SearchScreenState extends State<SearchScreen>
           
           snippet = snippet.replaceAll('\n', ' ');
           
-          expandedResults.add(SearchMatch(note, snippet));
+          expandedResults.add(SearchMatch(note, snippet, index));
           start = index + lowerQuery.length;
         }
       }
@@ -250,7 +251,18 @@ class _SearchScreenState extends State<SearchScreen>
                 return NoteCard(
                   note: previewNote,
                   highlightQuery: _searchController.text,
-                  onTap: () => Navigator.pop(context, match.note.id),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => NoteEditorScreen(
+                          note: match.note,
+                          matchIndex: match.matchIndex,
+                          matchLength: _searchController.text.length,
+                        ),
+                      ),
+                    );
+                  },
                   onLongPress: () {},
                 );
               },
@@ -329,5 +341,6 @@ class _SearchScreenState extends State<SearchScreen>
 class SearchMatch {
   final Note note;
   final String snippet;
-  SearchMatch(this.note, this.snippet);
+  final int matchIndex;
+  SearchMatch(this.note, this.snippet, this.matchIndex);
 }
