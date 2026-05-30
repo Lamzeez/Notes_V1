@@ -19,18 +19,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
-  final GlobalKey _contentKey = GlobalKey();
-
-  RenderEditable? _findRenderEditable(RenderObject? root) {
-    if (root is RenderEditable) return root;
-    if (root == null) return null;
-    RenderEditable? result;
-    root.visitChildren((child) {
-      result ??= _findRenderEditable(child);
-    });
-    return result;
-  }
+  ScrollController? _scrollController;
+  bool _isInit = false;
 
   @override
   void initState() {
@@ -38,7 +28,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _titleController = TextEditingController(text: widget.note?.title ?? '');
     _contentController = TextEditingController(text: widget.note?.content ?? '');
 
-    if (widget.matchIndex != null && widget.matchLength != null) {
+    if (widget.matchIndex == null || widget.matchLength == null) {
+      _scrollController = ScrollController();
+    } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _contentFocusNode.requestFocus();
@@ -46,34 +38,37 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           baseOffset: widget.matchIndex!,
           extentOffset: widget.matchIndex! + widget.matchLength!,
         );
-
-        // Wait for keyboard and native auto-scroll to finish,
-        // then query the precise pixel location from the native rendering engine.
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (!mounted || !_scrollController.hasClients) return;
-          
-          final root = _contentKey.currentContext?.findRenderObject();
-          final renderEditable = _findRenderEditable(root);
-          
-          if (renderEditable != null) {
-            final endpoints = renderEditable.getEndpointsForSelection(
-              TextSelection.collapsed(offset: widget.matchIndex!)
-            );
-            
-            if (endpoints.isNotEmpty) {
-              final yOffset = endpoints.first.point.dy;
-              final targetOffset = (yOffset - 30) < 0 ? 0.0 : (yOffset - 30);
-              
-              final maxScroll = _scrollController.position.maxScrollExtent;
-              _scrollController.animateTo(
-                targetOffset.clamp(0.0, maxScroll),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-              );
-            }
-          }
-        });
       });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInit && _scrollController == null && widget.matchIndex != null) {
+      _isInit = true;
+      final text = _contentController.text.substring(0, widget.matchIndex!);
+      
+      final baseStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+        fontSize: 16,
+        height: 1.6,
+      ) ?? const TextStyle(fontSize: 16, height: 1.6);
+
+      final textSpan = TextSpan(
+        text: text,
+        style: baseStyle,
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+        textScaler: MediaQuery.textScalerOf(context),
+      );
+      
+      textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 40);
+      final yOffset = textPainter.size.height;
+      final targetOffset = (yOffset - 30) < 0 ? 0.0 : (yOffset - 30);
+      
+      _scrollController = ScrollController(initialScrollOffset: targetOffset);
     }
   }
 
@@ -82,7 +77,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
-    _scrollController.dispose();
+    _scrollController?.dispose();
     super.dispose();
   }
 
@@ -179,7 +174,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               const SizedBox(height: 12),
               Expanded(
                 child: TextField(
-                  key: _contentKey,
                   controller: _contentController,
                   scrollController: _scrollController,
                   focusNode: _contentFocusNode,
@@ -200,10 +194,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       fontSize: 16,
                     ),
                     border: InputBorder.none,
-                    // "Scroll Past End" padding allows the very last line to reach the top
-                    contentPadding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).size.height / 1.5,
-                    ),
+                    contentPadding: EdgeInsets.zero,
                   ),
                 ),
               ),
