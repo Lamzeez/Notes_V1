@@ -64,7 +64,7 @@ class _NotesScreenState extends State<NotesScreen> {
           key!.currentContext!,
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeInOut,
-          alignment: 0.3, // Position note at ~30% from top
+          alignment: 0.5, // Position note at center of viewport
         );
       }
     });
@@ -296,6 +296,7 @@ class _NotesScreenState extends State<NotesScreen> {
           : notes.isEmpty
               ? _buildEmptyState(isDark)
               : ListView.builder(
+                  reverse: true,
                   controller: _scrollController,
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
                   itemCount: notes.length,
