@@ -18,7 +18,7 @@ class _SearchScreenState extends State<SearchScreen>
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  List<Note> _results = [];
+  List<SearchMatch> _results = [];
   bool _isSearching = false;
   String _lastQuery = '';
   Timer? _debounce;
@@ -73,13 +73,42 @@ class _SearchScreenState extends State<SearchScreen>
 
     _debounce = Timer(const Duration(milliseconds: 150), () async {
       final provider = context.read<NotesProvider>();
-      final results = await provider.searchNotes(query.trim());
+      final notes = await provider.searchNotes(query.trim());
+      
+      final List<SearchMatch> expandedResults = [];
+      final lowerQuery = query.trim().toLowerCase();
+      
+      for (final note in notes) {
+        final text = note.content;
+        final lowerText = text.toLowerCase();
+        int start = 0;
+        
+        if (!lowerText.contains(lowerQuery)) continue;
+
+        while (true) {
+          final index = lowerText.indexOf(lowerQuery, start);
+          if (index == -1) break;
+          
+          final snippetStart = (index - 40).clamp(0, text.length);
+          final snippetEnd = (index + lowerQuery.length + 40).clamp(0, text.length);
+          
+          String snippet = text.substring(snippetStart, snippetEnd);
+          if (snippetStart > 0) snippet = '...$snippet';
+          if (snippetEnd < text.length) snippet = '$snippet...';
+          
+          snippet = snippet.replaceAll('\n', ' ');
+          
+          expandedResults.add(SearchMatch(note, snippet));
+          start = index + lowerQuery.length;
+        }
+      }
+
       if (mounted) {
         setState(() {
-          _results = results;
+          _results = expandedResults;
           _isSearching = false;
         });
-        if (results.isNotEmpty) {
+        if (expandedResults.isNotEmpty) {
           _animController.forward();
         } else {
           _animController.reverse();
@@ -216,11 +245,12 @@ class _SearchScreenState extends State<SearchScreen>
               padding: const EdgeInsets.only(top: 8, bottom: 16),
               itemCount: _results.length,
               itemBuilder: (context, index) {
-                final note = _results[index];
+                final match = _results[index];
+                final previewNote = match.note.copyWith(content: match.snippet);
                 return NoteCard(
-                  note: note,
+                  note: previewNote,
                   highlightQuery: _searchController.text,
-                  onTap: () => Navigator.pop(context, note.id),
+                  onTap: () => Navigator.pop(context, match.note.id),
                   onLongPress: () {},
                 );
               },
@@ -294,4 +324,10 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
+}
+
+class SearchMatch {
+  final Note note;
+  final String snippet;
+  SearchMatch(this.note, this.snippet);
 }
