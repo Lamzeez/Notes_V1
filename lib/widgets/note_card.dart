@@ -93,6 +93,16 @@ class _NoteCardState extends State<NoteCard>
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year} · $hour:$minute $period';
   }
 
+  String _formatShortDate(DateTime dt) {
+    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final period = dt.hour < 12 ? 'AM' : 'PM';
+    final month = dt.month.toString().padLeft(2, '0');
+    final day = dt.day.toString().padLeft(2, '0');
+    final year = (dt.year % 100).toString().padLeft(2, '0');
+    return '$month/$day/$year $hour:$minute $period';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -196,7 +206,7 @@ class _NoteCardState extends State<NoteCard>
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              '(edited: ${_formatDate(widget.note.updatedAt)})',
+                              '(edited: ${_formatShortDate(widget.note.updatedAt)})',
                               style: theme.textTheme.labelSmall!.copyWith(
                                 color: isDark
                                     ? Colors.white.withAlpha(70)
