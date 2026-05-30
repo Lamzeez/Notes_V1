@@ -47,9 +47,15 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (!_isInit && _scrollController == null && widget.matchIndex != null) {
       _isInit = true;
       final text = _contentController.text.substring(0, widget.matchIndex!);
+      
+      final baseStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+        fontSize: 16,
+        height: 1.6,
+      ) ?? const TextStyle(fontSize: 16, height: 1.6);
+
       final textSpan = TextSpan(
         text: text,
-        style: const TextStyle(fontSize: 16, height: 1.6),
+        style: baseStyle,
       );
       final textPainter = TextPainter(
         text: textSpan,
@@ -61,6 +67,20 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       final targetOffset = (yOffset - 30) < 0 ? 0.0 : (yOffset - 30);
       
       _scrollController = ScrollController(initialScrollOffset: targetOffset);
+
+      // Enforce the top position with an animation after the keyboard opens and
+      // the TextField's internal auto-scroll to the bottom finishes.
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && _scrollController != null && _scrollController!.hasClients) {
+          final maxScroll = _scrollController!.position.maxScrollExtent;
+          final clampedTarget = targetOffset.clamp(0.0, maxScroll);
+          _scrollController!.animateTo(
+            clampedTarget,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
     }
   }
 
