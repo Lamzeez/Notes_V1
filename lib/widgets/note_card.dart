@@ -36,9 +36,35 @@ TextSpan buildHighlightedText({
   return TextSpan(children: spans);
 }
 
+/// Builds a [TextSpan] that highlights only a specific match range.
+TextSpan buildSpecificHighlightedText({
+  required String text,
+  required int matchIndex,
+  required int matchLength,
+  required TextStyle normalStyle,
+  required TextStyle highlightStyle,
+}) {
+  if (matchIndex < 0 || matchIndex >= text.length || matchLength <= 0) {
+    return TextSpan(text: text, style: normalStyle);
+  }
+
+  final end = (matchIndex + matchLength).clamp(0, text.length);
+  final actualMatchIndex = matchIndex.clamp(0, text.length);
+
+  return TextSpan(
+    children: [
+      TextSpan(text: text.substring(0, actualMatchIndex), style: normalStyle),
+      TextSpan(text: text.substring(actualMatchIndex, end), style: highlightStyle),
+      TextSpan(text: text.substring(end), style: normalStyle),
+    ],
+  );
+}
+
 class NoteCard extends StatefulWidget {
   final Note note;
   final String highlightQuery;
+  final int? contentHighlightIndex;
+  final int? contentHighlightLength;
   final bool isHighlighted; // Glow highlight after scroll-to
   final bool isSelected; // Selection mode for batch delete
   final VoidCallback onTap;
@@ -48,6 +74,8 @@ class NoteCard extends StatefulWidget {
     super.key,
     required this.note,
     this.highlightQuery = '',
+    this.contentHighlightIndex,
+    this.contentHighlightLength,
     this.isHighlighted = false,
     this.isSelected = false,
     required this.onTap,
@@ -238,12 +266,20 @@ class _NoteCardState extends State<NoteCard>
               RichText(
                 maxLines: 7,
                 overflow: TextOverflow.ellipsis,
-                text: buildHighlightedText(
-                  text: widget.note.content,
-                  query: widget.highlightQuery,
-                  normalStyle: baseStyle,
-                  highlightStyle: highlightStyle,
-                ),
+                text: widget.contentHighlightIndex != null && widget.contentHighlightLength != null
+                    ? buildSpecificHighlightedText(
+                        text: widget.note.content,
+                        matchIndex: widget.contentHighlightIndex!,
+                        matchLength: widget.contentHighlightLength!,
+                        normalStyle: baseStyle,
+                        highlightStyle: highlightStyle,
+                      )
+                    : buildHighlightedText(
+                        text: widget.note.content,
+                        query: widget.highlightQuery,
+                        normalStyle: baseStyle,
+                        highlightStyle: highlightStyle,
+                      ),
               ),
             ],
           ),

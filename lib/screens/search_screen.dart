@@ -94,12 +94,16 @@ class _SearchScreenState extends State<SearchScreen>
           final snippetEnd = (index + lowerQuery.length + 40).clamp(0, text.length);
           
           String snippet = text.substring(snippetStart, snippetEnd);
-          if (snippetStart > 0) snippet = '...$snippet';
+          int snippetMatchIndex = index - snippetStart;
+          if (snippetStart > 0) {
+            snippet = '...$snippet';
+            snippetMatchIndex += 3;
+          }
           if (snippetEnd < text.length) snippet = '$snippet...';
           
           snippet = snippet.replaceAll('\n', ' ');
           
-          expandedResults.add(SearchMatch(note, snippet, index));
+          expandedResults.add(SearchMatch(note, snippet, index, snippetMatchIndex));
           start = index + lowerQuery.length;
         }
       }
@@ -251,6 +255,8 @@ class _SearchScreenState extends State<SearchScreen>
                 return NoteCard(
                   note: previewNote,
                   highlightQuery: _searchController.text,
+                  contentHighlightIndex: match.snippetMatchIndex,
+                  contentHighlightLength: _searchController.text.length,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -342,5 +348,6 @@ class SearchMatch {
   final Note note;
   final String snippet;
   final int matchIndex;
-  SearchMatch(this.note, this.snippet, this.matchIndex);
+  final int snippetMatchIndex;
+  SearchMatch(this.note, this.snippet, this.matchIndex, this.snippetMatchIndex);
 }
