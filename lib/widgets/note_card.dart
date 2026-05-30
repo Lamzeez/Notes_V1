@@ -173,39 +173,37 @@ class _NoteCardState extends State<NoteCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Timestamp row
-                    Row(
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    size: 12,
-                    color: isDark
-                        ? Colors.white.withAlpha(100)
-                        : Colors.black38,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatDate(widget.note.createdAt),
-                    style: theme.textTheme.labelSmall!.copyWith(
-                      color: isDark ? Colors.white.withAlpha(100) : Colors.black38,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.2,
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: isDark
+                              ? Colors.white.withAlpha(100)
+                              : Colors.black38,
+                        ),
+                        Text(
+                          _formatDate(widget.note.createdAt),
+                          style: theme.textTheme.labelSmall!.copyWith(
+                            color: isDark ? Colors.white.withAlpha(100) : Colors.black38,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        if (widget.note.updatedAt != widget.note.createdAt)
+                          Text(
+                            '(edited: ${_formatDate(widget.note.updatedAt)})',
+                            style: theme.textTheme.labelSmall!.copyWith(
+                              color: isDark
+                                  ? Colors.white.withAlpha(70)
+                                  : Colors.black26,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-                  if (widget.note.updatedAt != widget.note.createdAt) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      '(edited)',
-                      style: theme.textTheme.labelSmall!.copyWith(
-                        color: isDark
-                            ? Colors.white.withAlpha(70)
-                            : Colors.black26,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
               const SizedBox(height: 8),
               if (widget.note.title != null && widget.note.title!.trim().isNotEmpty) ...[
                 Text(
