@@ -89,10 +89,9 @@ class DatabaseHelper {
   // Update a note
   Future<void> updateNote(Note note) async {
     final db = await database;
-    final updated = note.copyWith(updatedAt: DateTime.now());
     await db.update(
       'notes',
-      updated.toMap(),
+      note.toMap(),
       where: 'id = ?',
       whereArgs: [note.id],
     );

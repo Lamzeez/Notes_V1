@@ -35,7 +35,11 @@ class NotesProvider extends ChangeNotifier {
   }
 
   Future<void> editNote(Note note, String? newTitle, String newContent) async {
-    final updated = note.copyWith(title: newTitle, content: newContent.trim());
+    final updated = note.copyWith(
+      title: newTitle, 
+      content: newContent.trim(),
+      updatedAt: DateTime.now(),
+    );
     await _db.updateNote(updated);
     final index = _notes.indexWhere((n) => n.id == note.id);
     if (index != -1) {

@@ -173,9 +173,8 @@ class _NoteCardState extends State<NoteCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 4,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.access_time_rounded,
@@ -184,6 +183,7 @@ class _NoteCardState extends State<NoteCard>
                               ? Colors.white.withAlpha(100)
                               : Colors.black38,
                         ),
+                        const SizedBox(width: 4),
                         Text(
                           _formatDate(widget.note.createdAt),
                           style: theme.textTheme.labelSmall!.copyWith(
@@ -192,16 +192,22 @@ class _NoteCardState extends State<NoteCard>
                             letterSpacing: 0.2,
                           ),
                         ),
-                        if (widget.note.updatedAt != widget.note.createdAt)
-                          Text(
-                            '(edited: ${_formatDate(widget.note.updatedAt)})',
-                            style: theme.textTheme.labelSmall!.copyWith(
-                              color: isDark
-                                  ? Colors.white.withAlpha(70)
-                                  : Colors.black26,
-                              fontStyle: FontStyle.italic,
+                        if (widget.note.updatedAt != widget.note.createdAt) ...[
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '(edited: ${_formatDate(widget.note.updatedAt)})',
+                              style: theme.textTheme.labelSmall!.copyWith(
+                                color: isDark
+                                    ? Colors.white.withAlpha(70)
+                                    : Colors.black26,
+                                fontStyle: FontStyle.italic,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
+                        ],
                       ],
                     ),
               const SizedBox(height: 8),
