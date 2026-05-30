@@ -18,7 +18,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
+  ScrollController? _scrollController;
+  bool _isInit = false;
 
   @override
   void initState() {
@@ -26,32 +27,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _titleController = TextEditingController(text: widget.note?.title ?? '');
     _contentController = TextEditingController(text: widget.note?.content ?? '');
 
-    if (widget.matchIndex != null && widget.matchLength != null) {
+    if (widget.matchIndex == null || widget.matchLength == null) {
+      _scrollController = ScrollController();
+    } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-
-        // Calculate exact Y offset of the match
-        final text = _contentController.text.substring(0, widget.matchIndex!);
-        final textSpan = TextSpan(
-          text: text,
-          style: const TextStyle(fontSize: 16, height: 1.6),
-        );
-        final textPainter = TextPainter(
-          text: textSpan,
-          textDirection: TextDirection.ltr,
-        );
-        
-        // Calculate width: screen width - 40 for horizontal padding
-        textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 40);
-        
-        final yOffset = textPainter.size.height;
-        final targetOffset = (yOffset - 20) < 0 ? 0.0 : (yOffset - 20);
-
-        if (_scrollController.hasClients) {
-          _scrollController.jumpTo(targetOffset);
-        }
-
-        // Focus and select the text
         _contentFocusNode.requestFocus();
         _contentController.selection = TextSelection(
           baseOffset: widget.matchIndex!,
@@ -62,11 +42,34 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInit && _scrollController == null && widget.matchIndex != null) {
+      _isInit = true;
+      final text = _contentController.text.substring(0, widget.matchIndex!);
+      final textSpan = TextSpan(
+        text: text,
+        style: const TextStyle(fontSize: 16, height: 1.6),
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      
+      textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 40);
+      final yOffset = textPainter.size.height;
+      final targetOffset = (yOffset - 30) < 0 ? 0.0 : (yOffset - 30);
+      
+      _scrollController = ScrollController(initialScrollOffset: targetOffset);
+    }
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
-    _scrollController.dispose();
+    _scrollController?.dispose();
     super.dispose();
   }
 
