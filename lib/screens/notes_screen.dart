@@ -295,11 +295,14 @@ class _NotesScreenState extends State<NotesScreen> {
           ? const Center(child: CircularProgressIndicator())
           : notes.isEmpty
               ? _buildEmptyState(isDark)
-              : ListView.builder(
-                  reverse: true,
-                  controller: _scrollController,
-                  padding: const EdgeInsets.only(top: 12, bottom: 8),
-                  itemCount: notes.length,
+              : Align(
+                  alignment: Alignment.topCenter,
+                  child: ListView.builder(
+                    reverse: true,
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    padding: const EdgeInsets.only(top: 12, bottom: 8),
+                    itemCount: notes.length,
                   itemBuilder: (context, index) {
                     final note = notes[index];
                     final isDeleting = _deletingNoteIds.contains(note.id);
@@ -320,6 +323,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     );
                   },
                 ),
+              ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
