@@ -24,6 +24,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   // Map from note id -> GlobalKey for scroll-to
   final Map<int, GlobalKey> _noteKeys = {};
+  final Set<int> _selectedNoteIds = {};
   final List<int> _deletingNoteIds = [];
 
   @override
@@ -70,8 +71,25 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
-  void _confirmDelete(Note note) {
+  void _toggleSelection(int noteId) {
+    setState(() {
+      if (_selectedNoteIds.contains(noteId)) {
+        _selectedNoteIds.remove(noteId);
+      } else {
+        _selectedNoteIds.add(noteId);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _selectedNoteIds.clear();
+    });
+  }
+
+  void _confirmBatchDelete() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final count = _selectedNoteIds.length;
 
     showDialog(
       context: context,
@@ -79,7 +97,7 @@ class _NotesScreenState extends State<NotesScreen> {
         backgroundColor: isDark ? const Color(0xFF1E1E2E) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Delete Note?',
+          'Delete $count Note${count > 1 ? 's' : ''}?',
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black87,
             fontWeight: FontWeight.w600,
@@ -111,12 +129,17 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              final noteId = note.id!;
-              setState(() => _deletingNoteIds.add(noteId));
+              final idsToDelete = _selectedNoteIds.toList();
+              setState(() {
+                _deletingNoteIds.addAll(idsToDelete);
+                _selectedNoteIds.clear();
+              });
               await Future.delayed(const Duration(milliseconds: 300));
               if (mounted) {
-                context.read<NotesProvider>().deleteNote(noteId);
-                setState(() => _deletingNoteIds.remove(noteId));
+                context.read<NotesProvider>().deleteNotes(idsToDelete);
+                setState(() {
+                  _deletingNoteIds.removeWhere((id) => idsToDelete.contains(id));
+                });
               }
             },
             child: const Text('Delete'),
@@ -126,70 +149,47 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  void _showActions(BuildContext context, Note note) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? const Color(0xFF1E1E2E) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  AppBar _buildSelectionAppBar(bool isDark, NotesProvider provider) {
+    return AppBar(
+      backgroundColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      leading: IconButton(
+        icon: Icon(Icons.close_rounded, color: isDark ? Colors.white70 : Colors.black87),
+        onPressed: _clearSelection,
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : Colors.black12,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.edit_rounded,
-                  color: isDark ? const Color(0xFF7986CB) : const Color(0xFF3F51B5),
-                ),
-                title: Text(
-                  'Edit Note',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => NoteEditorScreen(note: note)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.delete_outline_rounded,
-                  color: Color(0xFFE57373),
-                ),
-                title: const Text(
-                  'Delete Note',
-                  style: TextStyle(
-                    color: Color(0xFFE57373),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _confirmDelete(note);
-                },
-              ),
-            ],
+      title: Text(
+        '${_selectedNoteIds.length} selected',
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      actions: [
+        if (_selectedNoteIds.length == 1)
+          IconButton(
+            icon: Icon(Icons.edit_rounded, color: isDark ? Colors.white70 : Colors.black87),
+            onPressed: () {
+              final note = provider.notes.firstWhere((n) => n.id == _selectedNoteIds.first);
+              _clearSelection();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => NoteEditorScreen(note: note)),
+              );
+            },
           ),
+        IconButton(
+          icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE57373)),
+          onPressed: _confirmBatchDelete,
+        ),
+      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(
+          height: 1,
+          color: isDark ? Colors.white.withAlpha(15) : Colors.black.withAlpha(10),
         ),
       ),
     );
@@ -209,7 +209,9 @@ class _NotesScreenState extends State<NotesScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF12121C) : const Color(0xFFF5F6FF),
-      appBar: AppBar(
+      appBar: _selectedNoteIds.isNotEmpty
+          ? _buildSelectionAppBar(isDark, notesProvider)
+          : AppBar(
         backgroundColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
@@ -313,11 +315,22 @@ class _NotesScreenState extends State<NotesScreen> {
                         child: NoteCard(
                           note: note,
                           isHighlighted: _highlightedNoteId == note.id,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => NoteEditorScreen(note: note)),
-                          ),
-                          onLongPress: () => _showActions(context, note),
+                          isSelected: _selectedNoteIds.contains(note.id),
+                          onTap: () {
+                            if (_selectedNoteIds.isNotEmpty) {
+                              _toggleSelection(note.id!);
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => NoteEditorScreen(note: note)),
+                              );
+                            }
+                          },
+                          onLongPress: () {
+                            if (_selectedNoteIds.isEmpty) {
+                              _toggleSelection(note.id!);
+                            }
+                          },
                         ),
                       ),
                     );

@@ -40,6 +40,7 @@ class NoteCard extends StatefulWidget {
   final Note note;
   final String highlightQuery;
   final bool isHighlighted; // Glow highlight after scroll-to
+  final bool isSelected; // Selection mode for batch delete
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
@@ -48,6 +49,7 @@ class NoteCard extends StatefulWidget {
     required this.note,
     this.highlightQuery = '',
     this.isHighlighted = false,
+    this.isSelected = false,
     required this.onTap,
     required this.onLongPress,
   });
@@ -113,21 +115,27 @@ class _NoteCardState extends State<NoteCard>
       duration: const Duration(milliseconds: 400),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: widget.isHighlighted
+        color: widget.isSelected
             ? (isDark
-                ? const Color(0xFF3F4280).withAlpha(160)
+                ? const Color(0xFF3F4280).withAlpha(120)
                 : const Color(0xFFE8EBFF))
-            : (isDark
-                ? const Color(0xFF1E1E2E)
-                : Colors.white),
+            : widget.isHighlighted
+                ? (isDark
+                    ? const Color(0xFF3F4280).withAlpha(160)
+                    : const Color(0xFFE8EBFF))
+                : (isDark
+                    ? const Color(0xFF1E1E2E)
+                    : Colors.white),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: widget.isHighlighted
+          color: widget.isSelected 
               ? (isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0))
-              : (isDark
-                  ? Colors.white.withAlpha(15)
-                  : Colors.black.withAlpha(12)),
-          width: widget.isHighlighted ? 1.5 : 1,
+              : widget.isHighlighted
+                  ? (isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0))
+                  : (isDark
+                      ? Colors.white.withAlpha(15)
+                      : Colors.black.withAlpha(12)),
+          width: widget.isSelected ? 2.5 : (widget.isHighlighted ? 1.5 : 1),
         ),
         boxShadow: [
           BoxShadow(
@@ -158,13 +166,15 @@ class _NoteCardState extends State<NoteCard>
           },
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
-          child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              // Timestamp row
-              Row(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Timestamp row
+                    Row(
                 children: [
                   Icon(
                     Icons.access_time_rounded,
@@ -224,9 +234,26 @@ class _NoteCardState extends State<NoteCard>
             ],
           ),
         ),
-      ),
-      ),
-    );
-  }
-
+        if (widget.isSelected)
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
+              ),
+              child: const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+      ],
+    ),
+  ),
+),
+);
+}
 }

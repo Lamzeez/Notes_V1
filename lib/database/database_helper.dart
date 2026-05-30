@@ -102,4 +102,16 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  // Batch delete notes
+  Future<void> deleteNotes(List<int> ids) async {
+    if (ids.isEmpty) return;
+    final db = await database;
+    final placeholders = List.filled(ids.length, '?').join(',');
+    await db.delete(
+      'notes',
+      where: 'id IN ($placeholders)',
+      whereArgs: ids,
+    );
+  }
 }

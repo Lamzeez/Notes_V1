@@ -46,6 +46,13 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteNotes(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await _db.deleteNotes(ids);
+    _notes.removeWhere((n) => ids.contains(n.id));
+    notifyListeners();
+  }
+
   Future<List<Note>> searchNotes(String query) async {
     if (query.trim().isEmpty) return [];
     return await _db.searchNotes(query.trim());
