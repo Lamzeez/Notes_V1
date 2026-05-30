@@ -252,8 +252,34 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
                 final daysPassed = DateTime.now().difference(deletedAt).inDays;
                 final daysLeft = (30 - daysPassed).clamp(0, 30);
 
+                bool showHeader = false;
+                if (index == 0) {
+                  showHeader = true;
+                } else {
+                  final prevNote = deletedNotes[index - 1];
+                  final prevDeletedAt = prevNote.deletedAt ?? DateTime.now();
+                  final prevDaysPassed = DateTime.now().difference(prevDeletedAt).inDays;
+                  final prevDaysLeft = (30 - prevDaysPassed).clamp(0, 30);
+                  if (daysLeft != prevDaysLeft) {
+                    showHeader = true;
+                  }
+                }
+
                 return Column(
                   children: [
+                    if (showHeader)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
+                        child: Text(
+                          '$daysLeft days left',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.white54 : Colors.black54,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
                     NoteCard(
                       note: note,
                       isSelected: _selectedNoteIds.contains(note.id),
@@ -269,17 +295,6 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
                           _toggleSelection(note.id!);
                         }
                       },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0, top: 0.0),
-                      child: Text(
-                        '$daysLeft days left',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isDark ? Colors.white38 : Colors.black38,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                     ),
                   ],
                 );
