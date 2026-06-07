@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/notes_provider.dart';
 import 'providers/theme_provider.dart';
-import 'screens/notes_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +33,7 @@ class NotesApp extends StatelessWidget {
             themeMode: themeProvider.themeMode,
             theme: _buildLightTheme(),
             darkTheme: _buildDarkTheme(),
-            home: const NotesScreen(),
+            home: const SplashScreen(),
           );
         },
       ),
