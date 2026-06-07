@@ -136,27 +136,101 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-        title: Text('Unsaved Changes', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
-        content: Text('You have unsaved changes. What would you like to do?', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false), // Cancel
-            child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white54 : Colors.black45)),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true), // Discard
-            child: const Text('Discard', style: TextStyle(color: Colors.redAccent)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF2A2A3D) : const Color(0xFFF5F6FF),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.save_as_rounded,
+                  size: 36,
+                  color: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Unsaved Changes',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'You have unsaved changes. What would you like to do before leaving?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.black54,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      onPressed: () => Navigator.pop(context, true), // Discard
+                      child: const Text('Discard', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 16)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context, false);
+                        _saveNote();
+                      },
+                      child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                onPressed: () => Navigator.pop(context, false), // Cancel
+                child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontWeight: FontWeight.w500)),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, false); // close dialog
-              _saveNote(); // Save and exit
-            },
-            child: const Text('Save', style: TextStyle(color: const Color(0xFF5C6BC0))),
-          ),
-        ],
+        ),
       ),
     );
 
