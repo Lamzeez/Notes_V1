@@ -227,7 +227,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'You have unsaved changes. What would you like to do before leaving?',
+                'You have unsaved changes. Save note?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isDark ? Colors.white70 : Colors.black54,
@@ -247,7 +247,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Navigator.pop(context, true), // Discard
-                      child: const Text('Discard', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 13)),
+                      child: const Text('No', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 13)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -263,7 +263,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         Navigator.pop(context, false);
                         _saveNote();
                       },
-                      child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white)),
+                      child: const Text('Yes', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white)),
                     ),
                   ),
                 ],
