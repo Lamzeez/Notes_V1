@@ -19,6 +19,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
+  final UndoHistoryController _undoController = UndoHistoryController();
   ScrollController? _scrollController;
   bool _isInit = false;
   bool _hasChanges = false;
@@ -101,6 +102,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
+    _undoController.dispose();
     _scrollController?.dispose();
     super.dispose();
   }
@@ -190,6 +192,30 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           ),
         ),
         actions: [
+          ValueListenableBuilder<UndoHistoryValue>(
+            valueListenable: _undoController,
+            builder: (context, value, child) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.undo_rounded,
+                      color: value.canUndo ? (isDark ? Colors.white70 : Colors.black54) : (isDark ? Colors.white24 : Colors.black26),
+                    ),
+                    onPressed: value.canUndo ? () => _undoController.undo() : null,
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.redo_rounded,
+                      color: value.canRedo ? (isDark ? Colors.white70 : Colors.black54) : (isDark ? Colors.white24 : Colors.black26),
+                    ),
+                    onPressed: value.canRedo ? () => _undoController.redo() : null,
+                  ),
+                ],
+              );
+            },
+          ),
           TextButton.icon(
             onPressed: _saveNote,
             icon: Icon(Icons.check_rounded, color: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0)),
@@ -240,6 +266,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               Expanded(
                 child: TextField(
                   controller: _contentController,
+                  undoController: _undoController,
                   scrollController: _scrollController,
                   focusNode: _contentFocusNode,
                   autofocus: widget.note == null && widget.matchIndex == null,
