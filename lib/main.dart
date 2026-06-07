@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'providers/notes_provider.dart';
 import 'providers/theme_provider.dart';
 import 'screens/splash_screen.dart';
@@ -60,20 +62,10 @@ class NotesApp extends StatelessWidget {
           statusBarIconBrightness: Brightness.dark,
         ),
       ),
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(
-          
-          fontSize: 15,
-          height: 1.55,
-        ),
-        bodyMedium: TextStyle(
-          
-          fontSize: 14,
-        ),
-        labelSmall: TextStyle(
-          
-          fontSize: 11,
-        ),
+      textTheme: GoogleFonts.tinosTextTheme(ThemeData.light().textTheme).copyWith(
+        bodyLarge: GoogleFonts.tinos(fontSize: 17, height: 1.55),
+        bodyMedium: GoogleFonts.tinos(fontSize: 16),
+        labelSmall: GoogleFonts.tinos(fontSize: 13),
       ),
       dialogTheme: DialogThemeData(
         elevation: 8,
@@ -102,20 +94,10 @@ class NotesApp extends StatelessWidget {
           statusBarIconBrightness: Brightness.light,
         ),
       ),
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(
-          
-          fontSize: 15,
-          height: 1.55,
-        ),
-        bodyMedium: TextStyle(
-          
-          fontSize: 14,
-        ),
-        labelSmall: TextStyle(
-          
-          fontSize: 11,
-        ),
+      textTheme: GoogleFonts.tinosTextTheme(ThemeData.dark().textTheme).copyWith(
+        bodyLarge: GoogleFonts.tinos(fontSize: 17, height: 1.55, color: Colors.white),
+        bodyMedium: GoogleFonts.tinos(fontSize: 16, color: Colors.white70),
+        labelSmall: GoogleFonts.tinos(fontSize: 13, color: Colors.white54),
       ),
       dialogTheme: DialogThemeData(
         elevation: 8,
