@@ -257,8 +257,8 @@ class _SearchScreenState extends State<SearchScreen>
                   highlightQuery: _searchController.text,
                   contentHighlightIndex: match.snippetMatchIndex,
                   contentHighlightLength: _searchController.text.length,
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => NoteEditorScreen(
@@ -268,6 +268,9 @@ class _SearchScreenState extends State<SearchScreen>
                         ),
                       ),
                     );
+                    // Force a refresh of the search results to reflect any edits made
+                    _lastQuery = '';
+                    _onSearchChanged();
                   },
                   onLongPress: () {},
                 );
