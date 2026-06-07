@@ -127,24 +127,50 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       }
 
       final isDark = Theme.of(context).brightness == Brightness.dark;
+      final screenHeight = MediaQuery.of(context).size.height;
+      final screenWidth = MediaQuery.of(context).size.width;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
-            children: const [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 12),
-              Text(
-                'Note saved',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-              ),
-            ],
+          content: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2A2A3D) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.4 : 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle_rounded, color: Color(0xFF4CAF50), size: 24),
+                const SizedBox(width: 12),
+                Text(
+                  'Note saved',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
           ),
-          backgroundColor: isDark ? const Color(0xFF43A047) : const Color(0xFF4CAF50),
+          backgroundColor: Colors.transparent,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          elevation: 0,
+          margin: EdgeInsets.only(
+            bottom: screenHeight / 2 - 40,
+            left: screenWidth * 0.2,
+            right: screenWidth * 0.2,
+          ),
           duration: const Duration(seconds: 2),
-          elevation: 4,
         ),
       );
     }
@@ -162,10 +188,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -178,23 +204,23 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF2A2A3D) : const Color(0xFFF5F6FF),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.save_as_rounded,
-                  size: 28,
+                  size: 24,
                   color: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Text(
                 'Unsaved Changes',
                 style: TextStyle(
                   color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
                 ),
@@ -205,22 +231,22 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isDark ? Colors.white70 : Colors.black54,
-                  fontSize: 14,
+                  fontSize: 13,
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Navigator.pop(context, true), // Discard
-                      child: const Text('Discard', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 14)),
+                      child: const Text('Discard', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 13)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -228,15 +254,15 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     child: FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
                       onPressed: () {
                         Navigator.pop(context, false);
                         _saveNote();
                       },
-                      child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white)),
+                      child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white)),
                     ),
                   ),
                 ],
@@ -244,8 +270,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               const SizedBox(height: 4),
               TextButton(
                 style: TextButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 44),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  minimumSize: const Size(double.infinity, 36),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => Navigator.pop(context, false), // Cancel
                 child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontWeight: FontWeight.w500)),
@@ -295,6 +321,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(4),
                     icon: Icon(
                       Icons.undo_rounded,
                       color: value.canUndo ? (isDark ? Colors.white70 : Colors.black54) : (isDark ? Colors.white24 : Colors.black26),
@@ -302,6 +330,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     onPressed: value.canUndo ? () => _undoController.undo() : null,
                   ),
                   IconButton(
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(4),
                     icon: Icon(
                       Icons.redo_rounded,
                       color: value.canRedo ? (isDark ? Colors.white70 : Colors.black54) : (isDark ? Colors.white24 : Colors.black26),
@@ -312,10 +342,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               );
             },
           ),
-          TextButton.icon(
+          TextButton(
             onPressed: _saveNote,
-            icon: Icon(Icons.check_rounded, color: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0)),
-            label: Text(
+            child: Text(
               'Save',
               style: TextStyle(
                 color: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
