@@ -117,14 +117,36 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     }
 
     final provider = context.read<NotesProvider>();
-    if (widget.note == null) {
-      provider.addNote(title.isEmpty ? null : title, text);
+    if (widget.note != null && text.isEmpty && title.isEmpty) {
+      provider.deleteNote(widget.note!.id!);
     } else {
-      if (text.isEmpty && title.isEmpty) {
-        provider.deleteNote(widget.note!.id!);
+      if (widget.note == null) {
+        provider.addNote(title.isEmpty ? null : title, text);
       } else {
         provider.editNote(widget.note!, title.isEmpty ? null : title, text);
       }
+
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: const [
+              Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Text(
+                'Note saved',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+            ],
+          ),
+          backgroundColor: isDark ? const Color(0xFF43A047) : const Color(0xFF4CAF50),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          duration: const Duration(seconds: 2),
+          elevation: 4,
+        ),
+      );
     }
     _isPopping = true;
     Navigator.pop(context, true);
@@ -140,10 +162,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -156,49 +178,49 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF2A2A3D) : const Color(0xFFF5F6FF),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.save_as_rounded,
-                  size: 36,
+                  size: 28,
                   color: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Text(
                 'Unsaved Changes',
                 style: TextStyle(
                   color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 22,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 'You have unsaved changes. What would you like to do before leaving?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isDark ? Colors.white70 : Colors.black54,
-                  fontSize: 15,
+                  fontSize: 14,
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
                       onPressed: () => Navigator.pop(context, true), // Discard
-                      child: const Text('Discard', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 16)),
+                      child: const Text('Discard', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 14)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -206,24 +228,24 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     child: FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: isDark ? const Color(0xFF7986CB) : const Color(0xFF5C6BC0),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         elevation: 0,
                       ),
                       onPressed: () {
                         Navigator.pop(context, false);
                         _saveNote();
                       },
-                      child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white)),
+                      child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white)),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               TextButton(
                 style: TextButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  minimumSize: const Size(double.infinity, 44),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: () => Navigator.pop(context, false), // Cancel
                 child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontWeight: FontWeight.w500)),
