@@ -62,10 +62,10 @@ class NotesApp extends StatelessWidget {
           statusBarIconBrightness: Brightness.dark,
         ),
       ),
-      textTheme: GoogleFonts.tinosTextTheme(ThemeData.light().textTheme).copyWith(
-        bodyLarge: GoogleFonts.tinos(fontSize: 17, height: 1.55),
-        bodyMedium: GoogleFonts.tinos(fontSize: 16),
-        labelSmall: GoogleFonts.tinos(fontSize: 13),
+      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).copyWith(
+        bodyLarge: GoogleFonts.inter(fontSize: 16, height: 1.55),
+        bodyMedium: GoogleFonts.inter(fontSize: 15),
+        labelSmall: GoogleFonts.inter(fontSize: 12),
       ),
       dialogTheme: DialogThemeData(
         elevation: 8,
@@ -94,10 +94,10 @@ class NotesApp extends StatelessWidget {
           statusBarIconBrightness: Brightness.light,
         ),
       ),
-      textTheme: GoogleFonts.tinosTextTheme(ThemeData.dark().textTheme).copyWith(
-        bodyLarge: GoogleFonts.tinos(fontSize: 17, height: 1.55, color: Colors.white),
-        bodyMedium: GoogleFonts.tinos(fontSize: 16, color: Colors.white70),
-        labelSmall: GoogleFonts.tinos(fontSize: 13, color: Colors.white54),
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
+        bodyLarge: GoogleFonts.inter(fontSize: 16, height: 1.55, color: Colors.white),
+        bodyMedium: GoogleFonts.inter(fontSize: 15, color: Colors.white70),
+        labelSmall: GoogleFonts.inter(fontSize: 12, color: Colors.white54),
       ),
       dialogTheme: DialogThemeData(
         elevation: 8,

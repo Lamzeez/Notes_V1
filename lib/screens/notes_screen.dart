@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import '../providers/theme_provider.dart';
@@ -230,9 +231,8 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              'Notes V1',
-              style: TextStyle(
-                fontFamily: 'Inter',
+              'Notes',
+              style: GoogleFonts.inter(
                 fontWeight: FontWeight.w700,
                 fontSize: 20,
                 color: isDark ? Colors.white : const Color(0xFF1A1A2E),
