@@ -151,7 +151,7 @@ class _NoteCardState extends State<NoteCard>
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
         color: widget.isSelected
             ? (isDark
@@ -207,7 +207,7 @@ class _NoteCardState extends State<NoteCard>
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -216,7 +216,7 @@ class _NoteCardState extends State<NoteCard>
                       children: [
                         Icon(
                           Icons.access_time_rounded,
-                          size: 12,
+                          size: 11,
                           color: isDark
                               ? Colors.white.withAlpha(100)
                               : Colors.black38,
@@ -236,6 +236,7 @@ class _NoteCardState extends State<NoteCard>
                             child: Text(
                               '(edited: ${_formatShortDate(widget.note.updatedAt)})',
                               style: theme.textTheme.labelSmall!.copyWith(
+                                fontSize: 9.5,
                                 color: isDark
                                     ? Colors.white.withAlpha(70)
                                     : Colors.black26,

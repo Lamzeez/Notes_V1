@@ -352,14 +352,17 @@ class _NotesScreenState extends State<NotesScreen> {
                   },
                 ),
               ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const NoteEditorScreen()),
+      floatingActionButton: Transform.scale(
+        scale: 0.9,
+        child: FloatingActionButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NoteEditorScreen()),
+          ),
+          backgroundColor: const Color(0xFF5C6BC0),
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.add_rounded),
         ),
-        backgroundColor: const Color(0xFF5C6BC0),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add_rounded),
       ),
     );
   }

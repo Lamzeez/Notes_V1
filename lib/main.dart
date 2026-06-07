@@ -63,9 +63,9 @@ class NotesApp extends StatelessWidget {
         ),
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).copyWith(
-        bodyLarge: GoogleFonts.inter(fontSize: 16, height: 1.55),
-        bodyMedium: GoogleFonts.inter(fontSize: 15),
-        labelSmall: GoogleFonts.inter(fontSize: 12),
+        bodyLarge: GoogleFonts.inter(fontSize: 15, height: 1.5),
+        bodyMedium: GoogleFonts.inter(fontSize: 14),
+        labelSmall: GoogleFonts.inter(fontSize: 11),
       ),
       dialogTheme: DialogThemeData(
         elevation: 8,
@@ -95,9 +95,9 @@ class NotesApp extends StatelessWidget {
         ),
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
-        bodyLarge: GoogleFonts.inter(fontSize: 16, height: 1.55, color: Colors.white),
-        bodyMedium: GoogleFonts.inter(fontSize: 15, color: Colors.white70),
-        labelSmall: GoogleFonts.inter(fontSize: 12, color: Colors.white54),
+        bodyLarge: GoogleFonts.inter(fontSize: 15, height: 1.5, color: Colors.white),
+        bodyMedium: GoogleFonts.inter(fontSize: 14, color: Colors.white70),
+        labelSmall: GoogleFonts.inter(fontSize: 11, color: Colors.white54),
       ),
       dialogTheme: DialogThemeData(
         elevation: 8,

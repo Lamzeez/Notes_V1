@@ -322,14 +322,14 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 controller: _titleController,
                 style: TextStyle(
                   color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: FontWeight.w700,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Title',
                   hintStyle: TextStyle(
                     color: isDark ? Colors.white30 : Colors.black38,
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: FontWeight.w700,
                   ),
                   border: InputBorder.none,
@@ -350,14 +350,14 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   textCapitalization: TextCapitalization.sentences,
                   style: TextStyle(
                     color: isDark ? Colors.white.withAlpha(230) : Colors.black87,
-                    fontSize: 16,
+                    fontSize: 15,
                     height: 1.6,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Start writing your note here...',
                     hintStyle: TextStyle(
                       color: isDark ? Colors.white30 : Colors.black38,
-                      fontSize: 16,
+                      fontSize: 15,
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
