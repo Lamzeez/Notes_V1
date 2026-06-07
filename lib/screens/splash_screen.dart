@@ -69,14 +69,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.edit_note_rounded,
-                  size: 96,
-                  color: isDark ? const Color(0xFF7986CB) : Colors.white,
+                Image.asset(
+                  'assets/Notes_V1_logoo.png',
+                  width: 120,
+                  height: 120,
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Notes',
+                  'Notes V1',
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
