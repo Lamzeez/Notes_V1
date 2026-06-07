@@ -242,6 +242,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   Expanded(
                     child: TextButton(
                       style: TextButton.styleFrom(
+                        backgroundColor: isDark ? Colors.redAccent.withAlpha(25) : Colors.redAccent.withAlpha(20),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -270,6 +271,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               const SizedBox(height: 4),
               TextButton(
                 style: TextButton.styleFrom(
+                  backgroundColor: isDark ? Colors.white.withAlpha(15) : Colors.black.withAlpha(10),
                   minimumSize: const Size(double.infinity, 36),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
