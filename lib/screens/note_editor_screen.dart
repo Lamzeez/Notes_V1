@@ -21,12 +21,34 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final FocusNode _contentFocusNode = FocusNode();
   ScrollController? _scrollController;
   bool _isInit = false;
+  bool _hasChanges = false;
+  bool _isPopping = false;
+
+  bool get _hasUnsavedChanges {
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+    final originalTitle = widget.note?.title ?? '';
+    final originalContent = widget.note?.content ?? '';
+    return title != originalTitle || content != originalContent;
+  }
+
+  void _onTextChanged() {
+    final hasChanges = _hasUnsavedChanges;
+    if (hasChanges != _hasChanges) {
+      setState(() {
+        _hasChanges = hasChanges;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
     _contentController = TextEditingController(text: widget.note?.content ?? '');
+
+    _titleController.addListener(_onTextChanged);
+    _contentController.addListener(_onTextChanged);
 
     if (widget.matchIndex == null || widget.matchLength == null) {
       _scrollController = ScrollController();
@@ -74,6 +96,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   @override
   void dispose() {
+    _titleController.removeListener(_onTextChanged);
+    _contentController.removeListener(_onTextChanged);
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
@@ -85,6 +109,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     final title = _titleController.text.trim();
     final text = _contentController.text.trim();
     if (text.isEmpty && title.isEmpty && widget.note == null) {
+      _isPopping = true;
       Navigator.pop(context);
       return;
     }
@@ -99,22 +124,62 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         provider.editNote(widget.note!, title.isEmpty ? null : title, text);
       }
     }
+    _isPopping = true;
     Navigator.pop(context, true);
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_hasChanges || _isPopping) return true;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+        title: Text('Unsaved Changes', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+        content: Text('You have unsaved changes. What would you like to do?', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false), // Cancel
+            child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white54 : Colors.black45)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), // Discard
+            child: const Text('Discard', style: TextStyle(color: Colors.redAccent)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, false); // close dialog
+              _saveNote(); // Save and exit
+            },
+            child: const Text('Save', style: TextStyle(color: const Color(0xFF5C6BC0))),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      _isPopping = true;
+      return true;
+    }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF12121C) : const Color(0xFFF5F6FF),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF12121C) : const Color(0xFFF5F6FF),
       appBar: AppBar(
         backgroundColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_rounded, color: isDark ? Colors.white : Colors.black87),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.maybePop(context),
         ),
         title: Text(
           widget.note == null ? 'Add Note' : 'Edit Note',
@@ -202,6 +267,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
